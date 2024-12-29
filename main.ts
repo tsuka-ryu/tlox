@@ -23,8 +23,9 @@ export class Lox {
   }
 
   runFile(path: string) {
-    const bytes = Deno.readFileSync(path).toString(); // TODO: pathの解決が必要かも
-    this.run(bytes); // TODO: 何か変換が必要？
+    const bytes = Deno.readFileSync(path);
+    const lines = new TextDecoder().decode(bytes);
+    this.run(lines);
 
     if (this.hadError) Deno.exit(65);
   }
