@@ -197,7 +197,7 @@ export class Scanner {
     if (this.isAtEnd()) return false;
     if (this.source.charAt(this.current) != expected) return false;
 
-    this.current;
+    this.current++;
     return true;
   }
 
