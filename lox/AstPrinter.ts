@@ -1,6 +1,4 @@
 import { Expr, Visitor, Binary, Grouping, Literal, Unary } from "./Expr.ts";
-import { Token } from "./Token.ts";
-import { TokenTypeObject } from "./TokenType.ts";
 
 export class AstPrinter implements Visitor<string> {
   print(expr: Expr): string {
