@@ -1,8 +1,8 @@
 import { Token } from "./Token.ts";
-abstract class Expr {
+export abstract class Expr {
   abstract accept<R>(visitor: Visitor<R>): R;
 }
-interface Visitor<R> {
+export interface Visitor<R> {
   visitBinaryExpr(expr: Binary): R;
   visitGroupingExpr(expr: Grouping): R;
   visitLiteralExpr(expr: Literal): R;
@@ -33,8 +33,8 @@ export class Grouping extends Expr {
   }
 }
 export class Literal extends Expr {
-  value: object;
-  constructor(value: object) {
+  value: number;
+  constructor(value: number) {
     super();
     this.value = value;
   }

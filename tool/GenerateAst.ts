@@ -4,7 +4,7 @@ function main() {
     // パースできなくなるので、カンマの後には空白を入れない
     "Binary: Expr left,Token operator,Expr right",
     "Grouping: Expr expression",
-    "Literal: object value", // TODO: あとで正しい型にする
+    "Literal: number value", // TODO: あとで正しい型にする
     "Unary: Token operator,Expr right",
   ]);
 }
@@ -19,11 +19,11 @@ function defineAst(outputDir: string, baseName: string, types: string[]) {
   const importStmt = `import { Token } from "./Token.ts";`;
   Deno.writeTextFileSync(path, importStmt, { append: true });
   // Exprクラスを定義
-  const exprAbstractClass = `abstract class Expr { abstract accept<R>(visitor: Visitor<R>): R; }`;
+  const exprAbstractClass = `export abstract class Expr { abstract accept<R>(visitor: Visitor<R>): R; }`;
   Deno.writeTextFileSync(path, exprAbstractClass, { append: true });
 
   // Visitorのinterfaceを定義
-  const visitorInterfaceStmt = `interface Visitor<R> {`;
+  const visitorInterfaceStmt = `export interface Visitor<R> {`;
   Deno.writeTextFileSync(path, visitorInterfaceStmt, { append: true });
 
   for (const type of types) {
