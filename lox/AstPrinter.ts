@@ -39,19 +39,22 @@ export class AstPrinter implements Visitor<string> {
     return builder.join();
   }
 
-  main() {
-    const expression = new Binary(
-      new Unary(
-        new Token(TokenTypeObject.MINUS, "-", null, 1),
-        new Literal(123)
-      ),
-      new Token(TokenTypeObject.STAR, "*", null, 1),
-      new Grouping(new Literal(45.67))
-    );
+  // NOTE: 動作確認用
+  // (* (- 123) (group 45.67))
+  // main() {
+  //   const expression = new Binary(
+  //     new Unary(
+  //       new Token(TokenTypeObject.MINUS, "-", null, 1),
+  //       new Literal(123)
+  //     ),
+  //     new Token(TokenTypeObject.STAR, "*", null, 1),
+  //     new Grouping(new Literal(45.67))
+  //   );
 
-    console.log(new AstPrinter().print(expression));
-  }
+  //   console.log(new AstPrinter().print(expression));
+  // }
 }
 
-const printer = new AstPrinter();
-printer.main();
+// NOTE: 動作確認用
+// const printer = new AstPrinter();
+// printer.main();
