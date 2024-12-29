@@ -67,7 +67,7 @@ export class Lox {
   }
 
   report(line: number, where: string, message: string) {
-    console.error(`[line ${line} ] Error ${where}: message`);
+    console.error(`[line ${line} ] Error ${where}: ${message}`);
     this.hadError = true;
   }
 }
