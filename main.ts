@@ -39,10 +39,14 @@ export class Lox {
 
       // 標準入力から1行読み取る
       const buf = new Uint8Array(1024);
-      const input = decoder.decode(buf);
+      const value = Deno.stdin.readSync(buf);
 
-      if (input == null) break;
-      this.run(input);
+      // EOF
+      if (value === null) break;
+
+      const line = decoder.decode(buf.subarray(0, value)).trim();
+
+      this.run(line);
       this.hadError = false;
     }
   }

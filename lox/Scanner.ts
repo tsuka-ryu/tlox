@@ -31,7 +31,7 @@ export class Scanner {
 
   constructor(source: string) {
     this.source = source;
-    this.tokens = []; // TODO: あとで実装
+    this.tokens = [];
     this.start = 0;
     this.current = 0;
     this.line = 1;
@@ -238,6 +238,7 @@ export class Scanner {
     if ("literal" in input) {
       const text = this.source.substring(this.start, this.current);
       this.tokens.push(new Token(input.type, text, input.literal, this.line));
+      return;
     }
 
     this.addToken({ type: input.type, literal: null });
