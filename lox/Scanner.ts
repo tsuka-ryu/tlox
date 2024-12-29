@@ -130,6 +130,7 @@ export class Scanner {
         break;
 
       case '"':
+        // 文字列リテラル
         this.string();
         break;
 
