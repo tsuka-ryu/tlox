@@ -119,9 +119,12 @@ export class Parser {
     throw this.error(this.peek(), "Expect expression.");
   }
 
+  // 規則と一致するか
   match(types: TokenType[]) {
     for (const type of types) {
+      // 現在のトークンが与えらた規則＝型と一致するかチェック
       if (this.check(type)) {
+        // 一致したら消費する
         this.advance();
         return true;
       }
@@ -135,11 +138,13 @@ export class Parser {
     throw this.error(this.peek(), message);
   }
 
+  // トークンは消費せず、型が同じかチェック
   check(type: TokenType) {
     if (this.isAtEnd()) return false;
     return this.peek().type === type;
   }
 
+  // トークンを消費して、トークンを返す
   advance() {
     if (!this.isAtEnd()) this.current++;
     return this.previous();
@@ -149,10 +154,13 @@ export class Parser {
     return this.peek().type === TokenTypeObject.EOF;
   }
 
+  // まだ消費していない現在のトークンを返す
   peek() {
     return this.tokens[this.current];
   }
 
+  // 最後に消費したトークンを返す
+  // いまmatch()したトークンを取得するときに使える
   previous() {
     return this.tokens[this.current - 1];
   }
