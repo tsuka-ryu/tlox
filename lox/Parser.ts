@@ -132,6 +132,8 @@ export class Parser {
     return false;
   }
 
+  // 型と一致するかを確認する
+  // 閉じかっこを探す場合などに使う
   consume(type: TokenType, message: string) {
     if (this.check(type)) return this.advance();
 
@@ -170,6 +172,7 @@ export class Parser {
     return new ParseError(message);
   }
 
+  // TODO: 「文」が実装されたら使うらしい
   synchronize() {
     this.advance();
     while (!this.isAtEnd()) {
