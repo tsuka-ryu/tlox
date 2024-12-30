@@ -141,7 +141,10 @@ export class Scanner {
           this.identifier();
         } else {
           // TODO: これで動くのかしら
-          new Lox().error(this.line, "Unexpected character."); // 想定外の文字
+          new Lox().error({
+            line: this.line,
+            message: "Unexpected character.",
+          }); // 想定外の文字
           break;
         }
     }
@@ -182,7 +185,7 @@ export class Scanner {
     }
 
     if (this.isAtEnd()) {
-      new Lox().error(this.line, "Unterminated string"); // 文字列が終結していない
+      new Lox().error({ line: this.line, message: "Unterminated string" }); // 文字列が終結していない
       return;
     }
 

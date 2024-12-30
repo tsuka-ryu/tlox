@@ -1,4 +1,5 @@
 import { Token } from "./Token.ts";
+type LiteralType = number | string | boolean | null;
 export abstract class Expr {
   abstract accept<R>(visitor: Visitor<R>): R;
 }
@@ -33,8 +34,8 @@ export class Grouping extends Expr {
   }
 }
 export class Literal extends Expr {
-  value: number;
-  constructor(value: number) {
+  value: LiteralType;
+  constructor(value: LiteralType) {
     super();
     this.value = value;
   }

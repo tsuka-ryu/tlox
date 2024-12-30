@@ -1,6 +1,10 @@
 // Lox.javaの代わり
 
+import { AstPrinter } from "./lox/AstPrinter.ts";
+import { Parser } from "./lox/Parser.ts";
 import { Scanner } from "./lox/Scanner.ts";
+import { Token } from "./lox/Token.ts";
+import { TokenTypeObject } from "./lox/TokenType.ts";
 
 export class Lox {
   hadError: boolean;
@@ -55,15 +59,33 @@ export class Lox {
   run(source: string) {
     const scanner = new Scanner(source);
     const tokens = scanner.scanTokens();
+    const parser = new Parser(tokens);
+    const expression = parser.parse();
 
-    // TODO: まずはプリントするだけ
-    for (const token of tokens) {
-      console.log(token);
-    }
+    if (this.hadError) return;
+    if (expression == null) return;
+
+    console.log(new AstPrinter().print(expression));
   }
 
-  error(line: number, message: string) {
-    this.report(line, "", message);
+  error(
+    input: { line: number; message: string } | { token: Token; message: string }
+  ) {
+    if ("line" in input) {
+      this.report(input.line, "", input.message);
+    }
+
+    if ("token" in input) {
+      if (input.token.type === TokenTypeObject.EOF) {
+        this.report(input.token.line, " at end", input.message);
+      } else {
+        this.report(
+          input.token.line,
+          ` at '${input.token.lexeme}'`,
+          input.message
+        );
+      }
+    }
   }
 
   report(line: number, where: string, message: string) {
