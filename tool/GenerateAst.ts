@@ -7,6 +7,7 @@ function main() {
   const outputDir = "./lox";
   defineAst(outputDir, BASE_NAMES.EXPR, [
     // パースできなくなるので、カンマの後には空白を入れない
+    "Assign: Token name,Expr value",
     "Binary: Expr left,Token operator,Expr right",
     "Grouping: Expr expression",
     "Literal: LiteralType value", // TODO: あとで正しい型にする

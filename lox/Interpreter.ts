@@ -7,6 +7,7 @@ import {
   Unary,
   Visitor as ExprVisitor,
   Variable,
+  Assign,
 } from "./Expr.ts";
 import {
   Expression,
@@ -66,6 +67,12 @@ export class Interpreter implements ExprVisitor<Object>, StmtVisitor<Object> {
 
     this.environment.define(stmt.name.lexeme, value);
     return null;
+  }
+
+  visitAssignExpr(expr: Assign): Object {
+    const value = this.evaluate(expr.value);
+    this.environment.assign(expr.name, value);
+    return value;
   }
 
   visitBinaryExpr(expr: Binary) {

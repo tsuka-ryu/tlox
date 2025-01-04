@@ -1,5 +1,5 @@
 import { Lox } from "../main.ts";
-import { Variable } from "./Expr.ts";
+import { Assign, Variable } from "./Expr.ts";
 import { Binary, Expr, Grouping, Literal, Unary } from "./Expr.ts";
 import { Expression, Var } from "./Stmt.ts";
 import { Print } from "./Stmt.ts";
@@ -33,7 +33,25 @@ export class Parser {
   }
 
   expression() {
-    return this.equality();
+    return this.assignment();
+  }
+
+  assignment(): Expr {
+    const expr = this.equality();
+
+    if (this.match([TokenTypeObject.EQUAL])) {
+      const equals = this.previous();
+      const value = this.assignment();
+
+      if (expr instanceof Var) {
+        const name = expr.name;
+        return new Assign(name, value);
+      }
+
+      this.error(equals, "Invalid assignment target.");
+    }
+
+    return expr;
   }
 
   declaration() {
