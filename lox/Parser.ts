@@ -1,6 +1,7 @@
 import { Lox } from "../main.ts";
+import { Variable } from "./Expr.ts";
 import { Binary, Expr, Grouping, Literal, Unary } from "./Expr.ts";
-import { Expression } from "./Stmt.ts";
+import { Expression, Var } from "./Stmt.ts";
 import { Print } from "./Stmt.ts";
 import { Token } from "./Token.ts";
 import { TokenType, TokenTypeObject } from "./TokenType.ts";
@@ -25,7 +26,7 @@ export class Parser {
   parse() {
     const statements = [];
     while (!this.isAtEnd()) {
-      statements.push(this.statement());
+      statements.push(this.declaration());
     }
 
     return statements;
@@ -33,6 +34,20 @@ export class Parser {
 
   expression() {
     return this.equality();
+  }
+
+  declaration() {
+    try {
+      if (this.match([TokenTypeObject.VAR])) return this.varDeclaration();
+      return this.statement();
+    } catch (error: unknown) {
+      if (error instanceof ParseError) {
+        this.synchronize();
+        return null;
+      }
+
+      throw Error("unknown ParseError");
+    }
   }
 
   statement() {
@@ -45,6 +60,26 @@ export class Parser {
     const value = this.expression();
     this.consume(TokenTypeObject.SEMICOLON, "Expect ';' after value.");
     return new Print(value);
+  }
+
+  varDeclaration() {
+    const name = this.consume(
+      TokenTypeObject.IDENTIFIER,
+      "Expect variable name."
+    );
+
+    if (this.match([TokenTypeObject.EQUAL])) {
+      const initializer = this.expression();
+
+      this.consume(
+        TokenTypeObject.SEMICOLON,
+        "Expect ';' after variable declaration."
+      );
+      return new Var(name, initializer);
+    }
+
+    // NOTE: jloxとちょっと違うけど、initializerにnullを代入するのは型的におかしいはずなので例外処理を追加
+    throw Error("varDeclaration is missed");
   }
 
   expressionStatement() {
@@ -111,7 +146,7 @@ export class Parser {
   }
 
   // NOTE: unaryは型を明示しないとanyになってしまう
-  unary(): Unary | Literal | Grouping {
+  unary(): Unary | Literal | Grouping | Variable {
     if (this.match([TokenTypeObject.BANG, TokenTypeObject.MINUS])) {
       const operator = this.previous();
       const right = this.unary();
@@ -128,6 +163,10 @@ export class Parser {
 
     if (this.match([TokenTypeObject.NUMBER, TokenTypeObject.STRING])) {
       return new Literal(this.previous().literal);
+    }
+
+    if (this.match([TokenTypeObject.IDENTIFIER])) {
+      return new Variable(this.previous());
     }
 
     if (this.match([TokenTypeObject.LEFT_PAREN])) {
