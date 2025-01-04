@@ -16,6 +16,7 @@ function main() {
   ]);
 
   defineAst(outputDir, BASE_NAMES.STMT, [
+    "Block: Stmt[] statements",
     "Expression: Expr expression",
     "Print: Expr expression",
     "Var : Token name,Expr initializer",

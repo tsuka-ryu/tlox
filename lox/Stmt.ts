@@ -4,9 +4,20 @@ export abstract class Stmt {
   abstract accept<R>(visitor: Visitor<R>): R;
 }
 export interface Visitor<R> {
+  visitBlockStmt(expr: Block): R;
   visitExpressionStmt(expr: Expression): R;
   visitPrintStmt(expr: Print): R;
   visitVarStmt(expr: Var): R;
+}
+export class Block extends Stmt {
+  statements: Stmt[];
+  constructor(statements: Stmt[]) {
+    super();
+    this.statements = statements;
+  }
+  accept<R>(visitor: Visitor<R>): R {
+    return visitor.visitBlockStmt(this);
+  }
 }
 export class Expression extends Stmt {
   expression: Expr;

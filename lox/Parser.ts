@@ -1,7 +1,7 @@
 import { Lox } from "../main.ts";
 import { Assign, Variable } from "./Expr.ts";
 import { Binary, Expr, Grouping, Literal, Unary } from "./Expr.ts";
-import { Expression, Var } from "./Stmt.ts";
+import { Block, Expression, Stmt, Var } from "./Stmt.ts";
 import { Print } from "./Stmt.ts";
 import { Token } from "./Token.ts";
 import { TokenType, TokenTypeObject } from "./TokenType.ts";
@@ -70,6 +70,8 @@ export class Parser {
 
   statement() {
     if (this.match([TokenTypeObject.PRINT])) return this.printStatement();
+    if (this.match([TokenTypeObject.LEFT_BRACE]))
+      return new Block(this.block());
 
     return this.expressionStatement();
   }
@@ -104,6 +106,20 @@ export class Parser {
     const expr = this.expression();
     this.consume(TokenTypeObject.SEMICOLON, "Expect ';' after expression.");
     return new Expression(expr);
+  }
+
+  block() {
+    const statements: Stmt[] = [];
+
+    while (!this.check(TokenTypeObject.RIGHT_BRACE) && !this.isAtEnd()) {
+      const _declaration = this.declaration();
+      if (_declaration !== null) {
+        statements.push(_declaration);
+      }
+    }
+
+    this.consume(TokenTypeObject.RIGHT_BRACE, "Expect '}' after block.");
+    return statements;
   }
 
   equality() {

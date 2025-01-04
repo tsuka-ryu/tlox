@@ -10,6 +10,7 @@ import {
   Assign,
 } from "./Expr.ts";
 import {
+  Block,
   Expression,
   Print,
   Stmt,
@@ -45,6 +46,24 @@ export class Interpreter implements ExprVisitor<Object>, StmtVisitor<Object> {
 
   execute(stmt: Stmt) {
     stmt.accept(this);
+  }
+
+  executeBlock(statements: Stmt[], environment: Environment) {
+    const previous = this.environment;
+    try {
+      this.environment = environment;
+
+      for (const statement of statements) {
+        this.execute(statement);
+      }
+    } finally {
+      this.environment = previous;
+    }
+  }
+
+  visitBlockStmt(stmt: Block): Object {
+    this.executeBlock(stmt.statements, new Environment(this.environment));
+    return null;
   }
 
   visitExpressionStmt(stmt: Expression): Object {
