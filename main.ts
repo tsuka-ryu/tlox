@@ -1,16 +1,22 @@
 // Lox.javaの代わり
 
-import { AstPrinter } from "./lox/AstPrinter.ts";
+// import { AstPrinter } from "./lox/AstPrinter.ts";
+import { Interpreter } from "./lox/Interpreter.ts";
 import { Parser } from "./lox/Parser.ts";
+import RuntimeError from "./lox/RuntimeError.ts";
 import { Scanner } from "./lox/Scanner.ts";
 import { Token } from "./lox/Token.ts";
 import { TokenTypeObject } from "./lox/TokenType.ts";
 
 export class Lox {
+  interpreter: Interpreter;
   hadError: boolean;
+  hadRuntimeError: boolean;
 
   constructor() {
+    this.interpreter = new Interpreter();
     this.hadError = false;
+    this.hadRuntimeError = false;
   }
 
   main() {
@@ -32,6 +38,7 @@ export class Lox {
     this.run(lines);
 
     if (this.hadError) Deno.exit(65);
+    if (this.hadRuntimeError) Deno.exit(70);
   }
 
   runPrompt() {
@@ -65,7 +72,10 @@ export class Lox {
     if (this.hadError) return;
     if (expression == null) return;
 
-    console.log(new AstPrinter().print(expression));
+    this.interpreter.interpret(expression);
+
+    // NOTE: 動作確認用のAstPrinter
+    // console.log(new AstPrinter().print(expression));
   }
 
   error(
@@ -86,6 +96,11 @@ export class Lox {
         );
       }
     }
+  }
+
+  runtimeError(error: RuntimeError) {
+    console.error(`${error.message}\n[line ${error.token.line}]`);
+    this.hadRuntimeError = true;
   }
 
   report(line: number, where: string, message: string) {
