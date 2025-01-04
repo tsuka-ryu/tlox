@@ -11,11 +11,13 @@ function main() {
     "Grouping: Expr expression",
     "Literal: LiteralType value", // TODO: あとで正しい型にする
     "Unary: Token operator,Expr right",
+    "Variable: Token name",
   ]);
 
   defineAst(outputDir, BASE_NAMES.STMT, [
     "Expression: Expr expression",
     "Print: Expr expression",
+    "Var : Token name,Expr initializer",
   ]);
 }
 
@@ -35,8 +37,12 @@ function defineAst(outputDir: string, baseName: string, types: string[]) {
     Deno.writeTextFileSync(path, literalType, { append: true });
   } else if (baseName === BASE_NAMES.STMT) {
     // Token型をimport
-    const importStmt = ` import { Expr } from "./Expr.ts";`;
-    Deno.writeTextFileSync(path, importStmt, { append: true });
+    const importToken = `import { Token } from "./Token.ts";`;
+    Deno.writeTextFileSync(path, importToken, { append: true });
+
+    // Expr型をimport
+    const importExpr = ` import { Expr } from "./Expr.ts";`;
+    Deno.writeTextFileSync(path, importExpr, { append: true });
   }
 
   // Exprクラスを定義
