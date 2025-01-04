@@ -11,8 +11,11 @@ export class Interpreter implements Visitor<Object> {
     try {
       const value = this.evaluate(expression);
       console.log(this.stringify(value));
-    } catch (error) {
-      new Lox().runtimeError(error);
+    } catch (error: unknown) {
+      if (error instanceof RuntimeError) {
+        new Lox().runtimeError(error);
+      }
+      throw Error("Runtime unknown error");
     }
   }
 
