@@ -6,15 +6,25 @@ import {
   Literal,
   Unary,
   Visitor as ExprVisitor,
+  Variable,
 } from "./Expr.ts";
-import { Expression, Print, Stmt, Visitor as StmtVisitor } from "./Stmt.ts";
+import {
+  Expression,
+  Print,
+  Stmt,
+  Visitor as StmtVisitor,
+  Var,
+} from "./Stmt.ts";
 import RuntimeError from "./RuntimeError.ts";
 import { Token } from "./Token.ts";
 import { TokenTypeObject } from "./TokenType.ts";
+import { Environment } from "./Environment.ts";
 
-type Object = number | string | boolean | null;
+export type Object = number | string | boolean | null;
 
 export class Interpreter implements ExprVisitor<Object>, StmtVisitor<Object> {
+  environment = new Environment();
+
   interpret(statements: Stmt[]) {
     try {
       for (const statement of statements) {
@@ -44,6 +54,17 @@ export class Interpreter implements ExprVisitor<Object>, StmtVisitor<Object> {
   visitPrintStmt(stmt: Print): Object {
     const value = this.evaluate(stmt.expression);
     console.log(this.stringify(value));
+    return null;
+  }
+
+  visitVarStmt(stmt: Var): Object {
+    let value = null;
+
+    if (stmt.initializer != null) {
+      value = this.evaluate(stmt.initializer);
+    }
+
+    this.environment.define(stmt.name.lexeme, value);
     return null;
   }
 
@@ -155,6 +176,10 @@ export class Interpreter implements ExprVisitor<Object>, StmtVisitor<Object> {
     }
     // unreachable
     return null;
+  }
+
+  visitVariableExpr(expr: Variable): Object {
+    return this.environment.get(expr.name) ?? null;
   }
 
   checkNumberOperand(operator: Token, operand: unknown): operand is number {
