@@ -1,11 +1,21 @@
+const BASE_NAMES = {
+  EXPR: "Expr",
+  STMT: "Stmt",
+};
+
 function main() {
   const outputDir = "./lox";
-  defineAst(outputDir, "Expr", [
+  defineAst(outputDir, BASE_NAMES.EXPR, [
     // パースできなくなるので、カンマの後には空白を入れない
     "Binary: Expr left,Token operator,Expr right",
     "Grouping: Expr expression",
     "Literal: LiteralType value", // TODO: あとで正しい型にする
     "Unary: Token operator,Expr right",
+  ]);
+
+  defineAst(outputDir, BASE_NAMES.STMT, [
+    "Expression: Expr expression",
+    "Print: Expr expression",
   ]);
 }
 
@@ -15,16 +25,22 @@ function defineAst(outputDir: string, baseName: string, types: string[]) {
   // ファイルを空にする
   Deno.writeTextFileSync(path, "");
 
-  // Token型をimport
-  const importStmt = `import { Token } from "./Token.ts";`;
-  Deno.writeTextFileSync(path, importStmt, { append: true });
+  if (baseName === BASE_NAMES.EXPR) {
+    // Token型をimport
+    const importStmt = `import { Token } from "./Token.ts";`;
+    Deno.writeTextFileSync(path, importStmt, { append: true });
 
-  // Literal型を定義
-  const literalType = "type LiteralType = number | string | boolean | null;";
-  Deno.writeTextFileSync(path, literalType, { append: true });
+    // Literal型を定義
+    const literalType = "type LiteralType = number | string | boolean | null;";
+    Deno.writeTextFileSync(path, literalType, { append: true });
+  } else if (baseName === BASE_NAMES.STMT) {
+    // Token型をimport
+    const importStmt = ` import { Expr } from "./Expr.ts";`;
+    Deno.writeTextFileSync(path, importStmt, { append: true });
+  }
 
   // Exprクラスを定義
-  const exprAbstractClass = `export abstract class Expr { abstract accept<R>(visitor: Visitor<R>): R; }`;
+  const exprAbstractClass = `export abstract class ${baseName} { abstract accept<R>(visitor: Visitor<R>): R; }`;
   Deno.writeTextFileSync(path, exprAbstractClass, { append: true });
 
   // Visitorのinterfaceを定義
@@ -36,7 +52,7 @@ function defineAst(outputDir: string, baseName: string, types: string[]) {
 
     Deno.writeTextFileSync(
       path,
-      `visit${className}Expr(expr: ${className}): R;`,
+      `visit${className}${baseName}(expr: ${className}): R;`,
       {
         append: true,
       }
@@ -50,7 +66,7 @@ function defineAst(outputDir: string, baseName: string, types: string[]) {
     const className = type.split(":")[0].trim();
     const fields = type.split(":")[1].trim();
 
-    const classNameStmt = `export class ${className} extends Expr`;
+    const classNameStmt = `export class ${className} extends ${baseName}`;
     Deno.writeTextFileSync(path, classNameStmt, { append: true });
     const leftBrace = "{";
     Deno.writeTextFileSync(path, leftBrace, { append: true });
@@ -105,7 +121,7 @@ function defineAst(outputDir: string, baseName: string, types: string[]) {
     // accept関数
     const acceptStmt = `accept<R>(visitor: Visitor<R>): R {`;
     Deno.writeTextFileSync(path, acceptStmt, { append: true });
-    const acceptVisitor = `return visitor.visit${className}Expr(this);`;
+    const acceptVisitor = `return visitor.visit${className}${baseName}(this);`;
     Deno.writeTextFileSync(path, acceptVisitor, { append: true });
     const acceptRightBrace = "}";
     Deno.writeTextFileSync(path, acceptRightBrace, { append: true });
@@ -115,7 +131,9 @@ function defineAst(outputDir: string, baseName: string, types: string[]) {
     Deno.writeTextFileSync(path, rightBrace, { append: true });
   }
 
-  const command = new Deno.Command("deno", { args: ["fmt", "./lox/Expr.ts"] });
+  const command = new Deno.Command("deno", {
+    args: ["fmt", `./lox/${baseName}.ts`],
+  });
   command.outputSync();
 }
 
