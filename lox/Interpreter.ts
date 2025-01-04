@@ -13,7 +13,7 @@ export class Interpreter implements Visitor<Object> {
       console.log(this.stringify(value));
     } catch (error: unknown) {
       if (error instanceof RuntimeError) {
-        new Lox().runtimeError(error);
+        return new Lox().runtimeError(error);
       }
       throw Error("Runtime unknown error");
     }
