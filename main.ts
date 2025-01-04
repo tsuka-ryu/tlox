@@ -67,12 +67,11 @@ export class Lox {
     const scanner = new Scanner(source);
     const tokens = scanner.scanTokens();
     const parser = new Parser(tokens);
-    const expression = parser.parse();
+    const statements = parser.parse();
 
     if (this.hadError) return;
-    if (expression == null) return;
 
-    this.interpreter.interpret(expression);
+    this.interpreter.interpret(statements);
 
     // NOTE: 動作確認用のAstPrinter
     // console.log(new AstPrinter().print(expression));

@@ -1,5 +1,7 @@
 import { Lox } from "../main.ts";
 import { Binary, Expr, Grouping, Literal, Unary } from "./Expr.ts";
+import { Expression } from "./Stmt.ts";
+import { Print } from "./Stmt.ts";
 import { Token } from "./Token.ts";
 import { TokenType, TokenTypeObject } from "./TokenType.ts";
 
@@ -21,16 +23,34 @@ export class Parser {
   }
 
   parse() {
-    try {
-      return this.expression();
-    } catch (e: unknown) {
-      console.log("parse error", e);
-      return null;
+    const statements = [];
+    while (!this.isAtEnd()) {
+      statements.push(this.statement());
     }
+
+    return statements;
   }
 
   expression() {
     return this.equality();
+  }
+
+  statement() {
+    if (this.match([TokenTypeObject.PRINT])) return this.printStatement();
+
+    return this.expressionStatement();
+  }
+
+  printStatement() {
+    const value = this.expression();
+    this.consume(TokenTypeObject.SEMICOLON, "Expect ';' after value.");
+    return new Print(value);
+  }
+
+  expressionStatement() {
+    const expr = this.expression();
+    this.consume(TokenTypeObject.SEMICOLON, "Expect ';' after expression.");
+    return new Expression(expr);
   }
 
   equality() {

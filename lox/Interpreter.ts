@@ -1,16 +1,25 @@
 import { Lox } from "../main.ts";
-import { Binary, Expr, Grouping, Literal, Unary, Visitor } from "./Expr.ts";
+import {
+  Binary,
+  Expr,
+  Grouping,
+  Literal,
+  Unary,
+  Visitor as ExprVisitor,
+} from "./Expr.ts";
+import { Expression, Print, Stmt, Visitor as StmtVisitor } from "./Stmt.ts";
 import RuntimeError from "./RuntimeError.ts";
 import { Token } from "./Token.ts";
 import { TokenTypeObject } from "./TokenType.ts";
 
 type Object = number | string | boolean | null;
 
-export class Interpreter implements Visitor<Object> {
-  interpret(expression: Expr) {
+export class Interpreter implements ExprVisitor<Object>, StmtVisitor<Object> {
+  interpret(statements: Stmt[]) {
     try {
-      const value = this.evaluate(expression);
-      console.log(this.stringify(value));
+      for (const statement of statements) {
+        this.execute(statement);
+      }
     } catch (error: unknown) {
       if (error instanceof RuntimeError) {
         return new Lox().runtimeError(error);
@@ -21,6 +30,21 @@ export class Interpreter implements Visitor<Object> {
 
   evaluate(expr: Expr): Object {
     return expr.accept(this);
+  }
+
+  execute(stmt: Stmt) {
+    stmt.accept(this);
+  }
+
+  visitExpressionStmt(stmt: Expression): Object {
+    this.evaluate(stmt.expression);
+    return null;
+  }
+
+  visitPrintStmt(stmt: Print): Object {
+    const value = this.evaluate(stmt.expression);
+    console.log(this.stringify(value));
+    return null;
   }
 
   visitBinaryExpr(expr: Binary) {
