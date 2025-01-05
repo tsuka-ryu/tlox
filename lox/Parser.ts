@@ -265,7 +265,6 @@ export class Parser {
     return new ParseError(message);
   }
 
-  // TODO: 「文」が実装されたら使うらしい
   synchronize() {
     this.advance();
     while (!this.isAtEnd()) {
