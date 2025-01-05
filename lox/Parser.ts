@@ -1,5 +1,5 @@
 import { Lox } from "../main.ts";
-import { Assign, Variable } from "./Expr.ts";
+import { Assign, Logical, Variable } from "./Expr.ts";
 import { Binary, Expr, Grouping, Literal, Unary } from "./Expr.ts";
 import { Block, Expression, If, Stmt, Var } from "./Stmt.ts";
 import { Print } from "./Stmt.ts";
@@ -37,7 +37,7 @@ export class Parser {
   }
 
   assignment(): Expr {
-    const expr = this.equality();
+    const expr = this.or();
 
     if (this.match([TokenTypeObject.EQUAL])) {
       const equals = this.previous();
@@ -49,6 +49,30 @@ export class Parser {
       }
 
       this.error(equals, "Invalid assignment target.");
+    }
+
+    return expr;
+  }
+
+  or() {
+    let expr = this.and();
+
+    while (this.match([TokenTypeObject.OR])) {
+      const operator = this.previous();
+      const right = this.and();
+      expr = new Logical(expr, operator, right);
+    }
+
+    return expr;
+  }
+
+  and() {
+    let expr = this.equality();
+
+    while (this.match([TokenTypeObject.AND])) {
+      const operator = this.previous();
+      const right = this.equality();
+      expr = new Logical(expr, operator, right);
     }
 
     return expr;

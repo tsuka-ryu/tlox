@@ -8,6 +8,7 @@ import {
   Visitor as ExprVisitor,
   Variable,
   Assign,
+  Logical,
 } from "./Expr.ts";
 import {
   Block,
@@ -194,6 +195,17 @@ export class Interpreter implements ExprVisitor<Object>, StmtVisitor<Object> {
   visitLiteralExpr(expr: Literal) {
     // console.log(expr.value);
     return expr.value;
+  }
+
+  visitLogicalExpr(expr: Logical): Object {
+    const left = this.evaluate(expr.left);
+
+    if (expr.operator.type === TokenTypeObject.OR) {
+      if (this.isTruthy(left)) return left;
+    } else {
+      if (!this.isTruthy(left)) return left;
+    }
+    return this.evaluate(expr.right);
   }
 
   visitGroupingExpr(expr: Grouping) {

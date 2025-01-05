@@ -10,7 +10,8 @@ function main() {
     "Assign: Token name,Expr value",
     "Binary: Expr left,Token operator,Expr right",
     "Grouping: Expr expression",
-    "Literal: LiteralType value", // TODO: あとで正しい型にする
+    "Literal: LiteralType value",
+    "Logical: Expr left,Token operator,Expr right",
     "Unary: Token operator,Expr right",
     "Variable: Token name",
   ]);
