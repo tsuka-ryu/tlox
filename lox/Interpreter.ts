@@ -12,6 +12,7 @@ import {
 import {
   Block,
   Expression,
+  If,
   Print,
   Stmt,
   Visitor as StmtVisitor,
@@ -68,6 +69,15 @@ export class Interpreter implements ExprVisitor<Object>, StmtVisitor<Object> {
 
   visitExpressionStmt(stmt: Expression): Object {
     this.evaluate(stmt.expression);
+    return null;
+  }
+
+  visitIfStmt(stmt: If): Object {
+    if (this.isTruthy(this.evaluate(stmt.condition))) {
+      this.execute(stmt.thenBranch);
+    } else if (stmt.elseBranch != null) {
+      this.execute(stmt.elseBranch);
+    }
     return null;
   }
 
