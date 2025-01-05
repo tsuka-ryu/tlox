@@ -43,7 +43,7 @@ export class Parser {
       const equals = this.previous();
       const value = this.assignment();
 
-      if (expr instanceof Var) {
+      if (expr instanceof Variable) {
         const name = expr.name;
         return new Assign(name, value);
       }
