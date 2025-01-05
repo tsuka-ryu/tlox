@@ -69,8 +69,8 @@ export class While extends Stmt {
 }
 export class Var extends Stmt {
   name: Token;
-  initializer: Expr;
-  constructor(name: Token, initializer: Expr) {
+  initializer: Expr | null;
+  constructor(name: Token, initializer: Expr | null) {
     super();
     this.name = name;
     this.initializer = initializer;

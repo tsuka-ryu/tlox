@@ -167,18 +167,16 @@ export class Parser {
       "Expect variable name."
     );
 
+    let initializer = null;
     if (this.match([TokenTypeObject.EQUAL])) {
-      const initializer = this.expression();
-
-      this.consume(
-        TokenTypeObject.SEMICOLON,
-        "Expect ';' after variable declaration."
-      );
-      return new Var(name, initializer);
+      initializer = this.expression();
     }
 
-    // NOTE: jloxとちょっと違うけど、initializerにnullを代入するのは型的におかしいはずなので例外処理を追加
-    throw Error("varDeclaration is missed");
+    this.consume(
+      TokenTypeObject.SEMICOLON,
+      "Expect ';' after variable declaration."
+    );
+    return new Var(name, initializer);
   }
 
   whileStatement(): While {
