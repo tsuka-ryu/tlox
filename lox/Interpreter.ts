@@ -182,6 +182,7 @@ export class Interpreter implements ExprVisitor<Object>, StmtVisitor<Object> {
   }
 
   visitLiteralExpr(expr: Literal) {
+    console.log(expr.value);
     return expr.value;
   }
 
@@ -205,6 +206,7 @@ export class Interpreter implements ExprVisitor<Object>, StmtVisitor<Object> {
   }
 
   visitVariableExpr(expr: Variable): Object {
+    console.log(this.environment.get(expr.name));
     return this.environment.get(expr.name) ?? null;
   }
 
