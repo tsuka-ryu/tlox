@@ -1,7 +1,7 @@
 import { Lox } from "../main.ts";
 import { Assign, Logical, Variable } from "./Expr.ts";
 import { Binary, Expr, Grouping, Literal, Unary } from "./Expr.ts";
-import { Block, Expression, If, Stmt, Var } from "./Stmt.ts";
+import { Block, Expression, If, Stmt, Var, While } from "./Stmt.ts";
 import { Print } from "./Stmt.ts";
 import { Token } from "./Token.ts";
 import { TokenType, TokenTypeObject } from "./TokenType.ts";
@@ -95,6 +95,7 @@ export class Parser {
   statement() {
     if (this.match([TokenTypeObject.IF])) return this.ifStatement();
     if (this.match([TokenTypeObject.PRINT])) return this.printStatement();
+    if (this.match([TokenTypeObject.WHILE])) return this.whileStatement();
     if (this.match([TokenTypeObject.LEFT_BRACE]))
       return new Block(this.block());
 
@@ -138,6 +139,16 @@ export class Parser {
 
     // NOTE: jloxとちょっと違うけど、initializerにnullを代入するのは型的におかしいはずなので例外処理を追加
     throw Error("varDeclaration is missed");
+  }
+
+  whileStatement(): While {
+    this.consume(TokenTypeObject.LEFT_PAREN, "Expect '(' after 'while'.");
+    const condition = this.expression();
+    this.consume(TokenTypeObject.RIGHT_PAREN, "Expect ')' after condition.");
+
+    const body = this.statement();
+
+    return new While(condition, body);
   }
 
   expressionStatement() {

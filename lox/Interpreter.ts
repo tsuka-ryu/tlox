@@ -18,6 +18,7 @@ import {
   Stmt,
   Visitor as StmtVisitor,
   Var,
+  While,
 } from "./Stmt.ts";
 import RuntimeError from "./RuntimeError.ts";
 import { Token } from "./Token.ts";
@@ -96,6 +97,14 @@ export class Interpreter implements ExprVisitor<Object>, StmtVisitor<Object> {
     }
 
     this.environment.define(stmt.name.lexeme, value);
+    return null;
+  }
+
+  visitWhileStmt(stmt: While): Object {
+    while (this.isTruthy(this.evaluate(stmt.condition))) {
+      this.execute(stmt.body);
+    }
+
     return null;
   }
 
