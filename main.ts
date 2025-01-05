@@ -71,7 +71,7 @@ export class Lox {
 
     if (this.hadError) return;
 
-    this.interpreter.interpret(statements);
+    this.interpreter.interpret(statements.filter((stmt) => !!stmt));
 
     // NOTE: 動作確認用のAstPrinter
     // console.log(new AstPrinter().print(expression));
