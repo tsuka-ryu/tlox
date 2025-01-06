@@ -25,12 +25,18 @@ import RuntimeError from "./RuntimeError.ts";
 import { Token } from "./Token.ts";
 import { TokenTypeObject } from "./TokenType.ts";
 import { Environment } from "./Environment.ts";
-import { LoxCallable } from "./LoxCallable.ts";
+import { Clock, LoxCallable } from "./LoxCallable.ts";
 
 export type Object = number | string | boolean | null;
 
 export class Interpreter implements ExprVisitor<Object>, StmtVisitor<Object> {
-  environment = new Environment();
+  globals = new Environment();
+  environment = this.globals;
+
+  constructor() {
+    // TODO: 正しく型をつけたい。ClockがObjectのサブタイプじゃないのでゴリ押し変換になってしまう
+    this.globals.define("clock", new Clock() as unknown as Object);
+  }
 
   interpret(statements: Stmt[]) {
     try {
