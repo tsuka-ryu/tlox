@@ -20,8 +20,10 @@ function main() {
   defineAst(outputDir, BASE_NAMES.STMT, [
     "Block: Stmt[] statements",
     "Expression: Expr expression",
+    "Function: Token name,Token[] params,Stmt[] body",
     "If : Expr condition,Stmt thenBranch,Stmt|null elseBranch",
     "Print: Expr expression",
+    "Return: Token keyword,Expr|null value",
     "While: Expr condition,Stmt body",
     "Var : Token name,Expr|null initializer",
   ]);

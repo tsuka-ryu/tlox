@@ -14,11 +14,13 @@ import {
 import {
   Block,
   Expression,
+  Function,
   If,
   Print,
   Stmt,
   Visitor as StmtVisitor,
   Var,
+  Return,
   While,
 } from "./Stmt.ts";
 import RuntimeError from "./RuntimeError.ts";
@@ -26,16 +28,23 @@ import { Token } from "./Token.ts";
 import { TokenTypeObject } from "./TokenType.ts";
 import { Environment } from "./Environment.ts";
 import { Clock, LoxCallable } from "./LoxCallable.ts";
+import { LoxFunction } from "./LoxFunction.ts";
+import { Return as ReturnClass } from "./Return.ts";
 
-export type Object = number | string | boolean | null;
+export type Object =
+  | LoxCallable
+  | LoxFunction
+  | number
+  | string
+  | boolean
+  | null;
 
 export class Interpreter implements ExprVisitor<Object>, StmtVisitor<Object> {
   globals = new Environment();
   environment = this.globals;
 
   constructor() {
-    // TODO: 正しく型をつけたい。ClockがObjectのサブタイプじゃないのでゴリ押し変換になってしまう
-    this.globals.define("clock", new Clock() as unknown as Object);
+    this.globals.define("clock", new Clock());
   }
 
   interpret(statements: Stmt[]) {
@@ -82,6 +91,12 @@ export class Interpreter implements ExprVisitor<Object>, StmtVisitor<Object> {
     return null;
   }
 
+  visitFunctionStmt(stmt: Function): Object {
+    const fun = new LoxFunction(stmt);
+    this.environment.define(stmt.name.lexeme, fun);
+    return null;
+  }
+
   visitIfStmt(stmt: If): Object {
     if (this.isTruthy(this.evaluate(stmt.condition))) {
       this.execute(stmt.thenBranch);
@@ -94,6 +109,16 @@ export class Interpreter implements ExprVisitor<Object>, StmtVisitor<Object> {
   visitPrintStmt(stmt: Print): Object {
     const value = this.evaluate(stmt.expression);
     console.log(this.stringify(value));
+    return null;
+  }
+
+  visitReturnStmt(stmt: Return) {
+    let value = null;
+    if (stmt.value != null) value = this.evaluate(stmt.value);
+
+    throw new ReturnClass(value);
+
+    // unreachable
     return null;
   }
 
@@ -218,7 +243,7 @@ export class Interpreter implements ExprVisitor<Object>, StmtVisitor<Object> {
       args.push(this.evaluate(arg));
     }
 
-    if (!(callee.call == null)) {
+    if (callee.call == null) {
       throw new RuntimeError(
         expr.paren,
         "Can only call functions and classes."

@@ -1,7 +1,16 @@
 import { Lox } from "../main.ts";
 import { Assign, Call, Logical, Variable } from "./Expr.ts";
 import { Binary, Expr, Grouping, Literal, Unary } from "./Expr.ts";
-import { Block, Expression, If, Stmt, Var, While } from "./Stmt.ts";
+import {
+  Block,
+  Expression,
+  Function,
+  If,
+  Return,
+  Stmt,
+  Var,
+  While,
+} from "./Stmt.ts";
 import { Print } from "./Stmt.ts";
 import { Token } from "./Token.ts";
 import { TokenType, TokenTypeObject } from "./TokenType.ts";
@@ -80,6 +89,7 @@ export class Parser {
 
   declaration() {
     try {
+      if (this.match([TokenTypeObject.FUN])) return this.function("function");
       if (this.match([TokenTypeObject.VAR])) return this.varDeclaration();
       return this.statement();
     } catch (error: unknown) {
@@ -96,6 +106,7 @@ export class Parser {
     if (this.match([TokenTypeObject.FOR])) return this.forStatement();
     if (this.match([TokenTypeObject.IF])) return this.ifStatement();
     if (this.match([TokenTypeObject.PRINT])) return this.printStatement();
+    if (this.match([TokenTypeObject.RETURN])) return this.returnStatement();
     if (this.match([TokenTypeObject.WHILE])) return this.whileStatement();
     if (this.match([TokenTypeObject.LEFT_BRACE]))
       return new Block(this.block());
@@ -165,6 +176,17 @@ export class Parser {
     return new Print(value);
   }
 
+  returnStatement() {
+    const keyword = this.previous();
+    let value: Expr = null;
+    if (!this.check(TokenTypeObject.SEMICOLON)) {
+      value = this.expression();
+    }
+
+    this.consume(TokenTypeObject.SEMICOLON, "Expect ';' after return value.");
+    return new Return(keyword, value);
+  }
+
   varDeclaration() {
     const name = this.consume(
       TokenTypeObject.IDENTIFIER,
@@ -197,6 +219,29 @@ export class Parser {
     const expr = this.expression();
     this.consume(TokenTypeObject.SEMICOLON, "Expect ';' after expression.");
     return new Expression(expr);
+  }
+
+  function(kind: string) {
+    const name = this.consume(
+      TokenTypeObject.IDENTIFIER,
+      `Expect ${kind} name.`
+    );
+    this.consume(TokenTypeObject.LEFT_PAREN, `Expect '(' after ${kind} name.`);
+    const parameters = [];
+    if (!this.check(TokenTypeObject.RIGHT_PAREN)) {
+      do {
+        if (parameters.length >= 255) {
+          this.error(this.peek(), "Can't have more than 255 parameters.");
+        }
+        parameters.push(
+          this.consume(TokenTypeObject.IDENTIFIER, "Expect parameter name.")
+        );
+      } while (this.match([TokenTypeObject.COMMA]));
+    }
+    this.consume(TokenTypeObject.RIGHT_PAREN, "Expect ')' after parameters.");
+    this.consume(TokenTypeObject.LEFT_BRACE, `Expect '{' before ${kind} body.`);
+    const body = this.block();
+    return new Function(name, parameters, body);
   }
 
   block() {

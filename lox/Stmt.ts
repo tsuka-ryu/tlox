@@ -6,8 +6,10 @@ export abstract class Stmt {
 export interface Visitor<R> {
   visitBlockStmt(expr: Block): R;
   visitExpressionStmt(expr: Expression): R;
+  visitFunctionStmt(expr: Function): R;
   visitIfStmt(expr: If): R;
   visitPrintStmt(expr: Print): R;
+  visitReturnStmt(expr: Return): R;
   visitWhileStmt(expr: While): R;
   visitVarStmt(expr: Var): R;
 }
@@ -29,6 +31,20 @@ export class Expression extends Stmt {
   }
   accept<R>(visitor: Visitor<R>): R {
     return visitor.visitExpressionStmt(this);
+  }
+}
+export class Function extends Stmt {
+  name: Token;
+  params: Token[];
+  body: Stmt[];
+  constructor(name: Token, params: Token[], body: Stmt[]) {
+    super();
+    this.name = name;
+    this.params = params;
+    this.body = body;
+  }
+  accept<R>(visitor: Visitor<R>): R {
+    return visitor.visitFunctionStmt(this);
   }
 }
 export class If extends Stmt {
@@ -53,6 +69,18 @@ export class Print extends Stmt {
   }
   accept<R>(visitor: Visitor<R>): R {
     return visitor.visitPrintStmt(this);
+  }
+}
+export class Return extends Stmt {
+  keyword: Token;
+  value: Expr | null;
+  constructor(keyword: Token, value: Expr | null) {
+    super();
+    this.keyword = keyword;
+    this.value = value;
+  }
+  accept<R>(visitor: Visitor<R>): R {
+    return visitor.visitReturnStmt(this);
   }
 }
 export class While extends Stmt {
