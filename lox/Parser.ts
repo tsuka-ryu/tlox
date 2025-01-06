@@ -342,14 +342,17 @@ export class Parser {
       "Expect ')' after arguments."
     );
 
+    // コーリーとエラーを投げるための位置、引数をASTノードにまとめてラップする
     return new Call(callee, paren, args);
   }
 
   call() {
+    // コール演算の左オペランドを解析
     let expr: Variable | Call | Grouping | Literal | Unary = this.primary();
 
     while (true) {
       if (this.match([TokenTypeObject.LEFT_PAREN])) {
+        // exprをコーリーとする呼びだしの解析を行、新たなexprにしてからループの先頭に戻る
         expr = this.finishCall(expr);
       } else {
         break;
