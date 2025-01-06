@@ -42,6 +42,7 @@ export type Object =
 export class Interpreter implements ExprVisitor<Object>, StmtVisitor<Object> {
   globals = new Environment();
   environment = this.globals;
+  locals = new Map<Expr, number>();
 
   constructor() {
     this.globals.define("clock", new Clock());
@@ -66,6 +67,10 @@ export class Interpreter implements ExprVisitor<Object>, StmtVisitor<Object> {
 
   execute(stmt: Stmt) {
     stmt.accept(this);
+  }
+
+  resolve(expr: Expr, depth: number) {
+    this.locals.set(expr, depth);
   }
 
   executeBlock(statements: Stmt[], environment: Environment) {
