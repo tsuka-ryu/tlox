@@ -4,5 +4,8 @@ loxの写経
 
 `deno run main.ts`
 
-## Expr.tsを生成
+## Expr.ts/Stmt.tsを生成
 `deno run ./tool/GenerateAst.ts`
+
+## テスト
+`deno run main.ts ./__tests__/[filename]`
