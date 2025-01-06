@@ -9,6 +9,7 @@ function main() {
     // パースできなくなるので、カンマの後には空白を入れない
     "Assign: Token name,Expr value",
     "Binary: Expr left,Token operator,Expr right",
+    "Call: Expr callee,Token paren,Expr[] args",
     "Grouping: Expr expression",
     "Literal: LiteralType value",
     "Logical: Expr left,Token operator,Expr right",
@@ -22,7 +23,7 @@ function main() {
     "If : Expr condition,Stmt thenBranch,Stmt|null elseBranch",
     "Print: Expr expression",
     "While: Expr condition,Stmt body",
-    "Var : Token name,Expr initializer",
+    "Var : Token name,Expr|null initializer",
   ]);
 }
 

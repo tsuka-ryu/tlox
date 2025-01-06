@@ -9,6 +9,7 @@ import {
   Variable,
   Assign,
   Logical,
+  Call,
 } from "./Expr.ts";
 import {
   Block,
@@ -24,6 +25,7 @@ import RuntimeError from "./RuntimeError.ts";
 import { Token } from "./Token.ts";
 import { TokenTypeObject } from "./TokenType.ts";
 import { Environment } from "./Environment.ts";
+import { LoxCallable } from "./LoxCallable.ts";
 
 export type Object = number | string | boolean | null;
 
@@ -199,6 +201,32 @@ export class Interpreter implements ExprVisitor<Object>, StmtVisitor<Object> {
 
     // unreachable
     return null;
+  }
+
+  visitCallExpr(expr: Call): Object {
+    // TODO: 正しく型付けしたい
+    const callee = this.evaluate(expr.callee) as unknown as LoxCallable;
+
+    const args = [];
+    for (const arg of expr.args) {
+      args.push(this.evaluate(arg));
+    }
+
+    if (!(callee.call == null)) {
+      throw new RuntimeError(
+        expr.paren,
+        "Can only call functions and classes."
+      );
+    }
+
+    const fun = callee;
+    if (args.length !== fun.arity()) {
+      throw new RuntimeError(
+        expr.paren,
+        `Expected ${fun.arity()} arguments but got ${args.length}.`
+      );
+    }
+    return fun.call(this, args);
   }
 
   visitLiteralExpr(expr: Literal) {

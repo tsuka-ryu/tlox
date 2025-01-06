@@ -1,5 +1,5 @@
 import { Lox } from "../main.ts";
-import { Assign, Logical, Variable } from "./Expr.ts";
+import { Assign, Call, Logical, Variable } from "./Expr.ts";
 import { Binary, Expr, Grouping, Literal, Unary } from "./Expr.ts";
 import { Block, Expression, If, Stmt, Var, While } from "./Stmt.ts";
 import { Print } from "./Stmt.ts";
@@ -271,14 +271,47 @@ export class Parser {
   }
 
   // NOTE: unaryは型を明示しないとanyになってしまう
-  unary(): Unary | Literal | Grouping | Variable {
+  unary(): Unary | Literal | Grouping | Variable | Call {
     if (this.match([TokenTypeObject.BANG, TokenTypeObject.MINUS])) {
       const operator = this.previous();
       const right = this.unary();
       return new Unary(operator, right);
     }
 
-    return this.primary();
+    return this.call();
+  }
+
+  finishCall(callee: Expr) {
+    const args = [];
+    if (!this.check(TokenTypeObject.RIGHT_PAREN)) {
+      do {
+        if (args.length >= 255) {
+          this.error(this.peek(), "Can't have more than 255 arguments.");
+        }
+        args.push(this.expression());
+      } while (this.match([TokenTypeObject.COMMA]));
+    }
+
+    const paren = this.consume(
+      TokenTypeObject.RIGHT_PAREN,
+      "Expect ')' after arguments."
+    );
+
+    return new Call(callee, paren, args);
+  }
+
+  call() {
+    let expr: Variable | Call | Grouping | Literal | Unary = this.primary();
+
+    while (true) {
+      if (this.match([TokenTypeObject.LEFT_PAREN])) {
+        expr = this.finishCall(expr);
+      } else {
+        break;
+      }
+    }
+
+    return expr;
   }
 
   primary() {
