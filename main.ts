@@ -3,6 +3,7 @@
 // import { AstPrinter } from "./lox/AstPrinter.ts";
 import { Interpreter } from "./lox/Interpreter.ts";
 import { Parser } from "./lox/Parser.ts";
+import { Resolver } from "./lox/Resolver.ts";
 import RuntimeError from "./lox/RuntimeError.ts";
 import { Scanner } from "./lox/Scanner.ts";
 import { Token } from "./lox/Token.ts";
@@ -67,11 +68,16 @@ export class Lox {
     const scanner = new Scanner(source);
     const tokens = scanner.scanTokens();
     const parser = new Parser(tokens);
-    const statements = parser.parse();
+    const statements = parser.parse().filter((stmt) => !!stmt);
 
     if (this.hadError) return;
 
-    this.interpreter.interpret(statements.filter((stmt) => !!stmt));
+    const resolver = new Resolver(this.interpreter);
+    resolver.resolve({ statements });
+
+    if (this.hadError) return;
+
+    this.interpreter.interpret(statements);
 
     // NOTE: 動作確認用のAstPrinter
     // console.log(new AstPrinter().print(expression));

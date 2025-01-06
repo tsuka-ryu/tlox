@@ -38,4 +38,22 @@ export class Environment {
   define(name: string, value: Object) {
     this.values.set(name, value);
   }
+
+  getAt(distance: number, name: string) {
+    return this.ancestor(distance)?.values.get(name);
+  }
+
+  assignAt(distance: number, name: Token, value: Object) {
+    this.ancestor(distance)?.values.set(name.lexeme, value);
+  }
+
+  ancestor(distance: number) {
+    // deno-lint-ignore no-this-alias
+    let environment: Environment | null = this;
+    for (let i = 0; i < distance; i++) {
+      environment = environment?.enclosing ?? null;
+    }
+
+    return environment;
+  }
 }

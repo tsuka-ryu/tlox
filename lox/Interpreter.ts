@@ -148,7 +148,13 @@ export class Interpreter implements ExprVisitor<Object>, StmtVisitor<Object> {
 
   visitAssignExpr(expr: Assign): Object {
     const value = this.evaluate(expr.value);
-    this.environment.assign(expr.name, value);
+
+    const distance = this.locals.get(expr);
+    if (distance != null) {
+      this.environment.assignAt(distance, expr.name, value);
+    } else {
+      this.globals.assign(expr.name, value);
+    }
     return value;
   }
 
@@ -301,8 +307,16 @@ export class Interpreter implements ExprVisitor<Object>, StmtVisitor<Object> {
   }
 
   visitVariableExpr(expr: Variable): Object {
-    // console.log(this.environment.get(expr.name));
-    return this.environment.get(expr.name) ?? null;
+    return this.lookUpVariable(expr.name, expr);
+  }
+
+  lookUpVariable(name: Token, expr: Expr) {
+    const distance = this.locals.get(expr);
+    if (distance != null) {
+      return this.environment.getAt(distance, name.lexeme);
+    } else {
+      return this.globals.get(name);
+    }
   }
 
   checkNumberOperand(operator: Token, operand: unknown): operand is number {

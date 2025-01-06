@@ -33,9 +33,17 @@ type ResolveType =
   | { statement: Stmt }
   | { expr: Expr };
 
+const FunctionTypeObject = {
+  NONE: "NONE",
+  FUNCTION: "FUNCTION",
+} as const;
+
+export type FunctionType = keyof typeof FunctionTypeObject;
+
 export class Resolver implements ExprVisitor<void>, StmtVisitor<void> {
   interpreter: Interpreter;
   scopes: Array<Map<string, boolean>>;
+  currentFunction: FunctionType = FunctionTypeObject.NONE;
 
   constructor(interpreter: Interpreter) {
     this.interpreter = interpreter;
@@ -54,7 +62,10 @@ export class Resolver implements ExprVisitor<void>, StmtVisitor<void> {
     }
   }
 
-  resolveFunction(fun: Function) {
+  resolveFunction(fun: Function, type: FunctionType) {
+    const enclosingFunction = this.currentFunction;
+    this.currentFunction = type;
+
     this.beginScope();
     for (const param of fun.params) {
       this.declare(param);
@@ -62,6 +73,8 @@ export class Resolver implements ExprVisitor<void>, StmtVisitor<void> {
     }
     this.resolve({ statements: fun.body });
     this.endScope();
+
+    this.currentFunction = enclosingFunction;
   }
 
   beginScope() {
@@ -76,6 +89,13 @@ export class Resolver implements ExprVisitor<void>, StmtVisitor<void> {
     if (this.scopes.length == 0) return;
 
     const scope = this.scopes[this.scopes.length - 1];
+    if (scope.has(name.lexeme)) {
+      new Lox().error({
+        token: name,
+        message: "Already a variable with this name in this scope.",
+      });
+    }
+
     scope.set(name.lexeme, false);
   }
 
@@ -110,6 +130,13 @@ export class Resolver implements ExprVisitor<void>, StmtVisitor<void> {
   }
 
   visitReturnStmt(stmt: Return): void {
+    if (this.currentFunction == FunctionTypeObject.NONE) {
+      new Lox().error({
+        token: stmt.keyword,
+        message: "Can't return from top-level code.",
+      });
+    }
+
     if (stmt.value != null) {
       this.resolve({ expr: stmt.value });
     }
@@ -122,7 +149,7 @@ export class Resolver implements ExprVisitor<void>, StmtVisitor<void> {
   visitFunctionStmt(stmt: Function): void {
     this.declare(stmt.name);
     this.define(stmt.name);
-    this.resolveFunction(stmt);
+    this.resolveFunction(stmt, FunctionTypeObject.FUNCTION);
   }
 
   visitVarStmt(stmt: Var): void {
