@@ -6,9 +6,11 @@ import { Function } from "./Stmt.ts";
 
 export class LoxFunction extends LoxCallable {
   declaration: Function;
+  closure: Environment;
 
-  constructor(declaration: Function) {
+  constructor(declaration: Function, closure: Environment) {
     super();
+    this.closure = closure;
     this.declaration = declaration;
   }
 
@@ -17,7 +19,7 @@ export class LoxFunction extends LoxCallable {
   }
 
   override call(interpreter: Interpreter, args: Object[]): Object {
-    const environment = new Environment(interpreter.globals);
+    const environment = new Environment(this.closure);
     for (let i = 0; i < this.declaration.params.length; i++) {
       environment.define(this.declaration.params[i].lexeme, args[i]);
     }
