@@ -128,13 +128,17 @@ export class Parser {
     this.consume(TokenTypeObject.RIGHT_PAREN, "Expect ')' after for clauses.");
     let body = this.statement();
 
+    // forループのセマンティックスをbodyに対して合成して作る
+    // bodyの後にincrementを実行する
     if (increment != null) {
       body = new Block([body, new Expression(increment)]);
     }
 
+    // 原始的なwhileループを実行
     if (condition == null) condition = new Literal(true);
     body = new While(condition, body);
 
+    // 初期化子があれば、ループ全体の前に実行する
     if (initializer != null) {
       body = new Block([initializer, body]);
     }
