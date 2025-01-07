@@ -200,10 +200,8 @@ export class Resolver implements ExprVisitor<void>, StmtVisitor<void> {
 
   visitVariableExpr(expr: Variable): void {
     if (
-      !(
-        this.scopes.length == 0 &&
-        this.scopes[this.scopes.length - 1].get(expr.name.lexeme) === false
-      )
+      !(this.scopes.length === 0) &&
+      this.scopes[this.scopes.length - 1].get(expr.name.lexeme) === false
     ) {
       new Lox().error({
         token: expr.name,
