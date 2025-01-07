@@ -74,6 +74,8 @@ export class Lox {
 
     const resolver = new Resolver(this.interpreter);
     resolver.resolve({ statements });
+    // NOTE: 解決した結果
+    // console.log({ locals: this.interpreter.locals });
 
     if (this.hadError) return;
 
