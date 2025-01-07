@@ -307,7 +307,7 @@ export class Interpreter implements ExprVisitor<Object>, StmtVisitor<Object> {
   }
 
   visitVariableExpr(expr: Variable): Object {
-    return this.lookUpVariable(expr.name, expr);
+    return this.lookUpVariable(expr.name, expr) ?? null;
   }
 
   lookUpVariable(name: Token, expr: Expr) {
